@@ -22,4 +22,6 @@ public class DebugExercise3 {
         In in = new In("foods.csv");
         System.out.println(countTurnips(in));
     }
+
+
 }
