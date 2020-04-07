@@ -10,7 +10,7 @@ public class ArrayDeque<T>{
 
     /** Creates an empty Array. */
     public ArrayDeque(){
-         T [] items=(T []) new Object[8];
+         items=(T []) new Object[8];
          size=0;
          nextFirst=0;
          nextLast=1;
@@ -79,9 +79,10 @@ public class ArrayDeque<T>{
         int toPrint= plusOne(nextFirst);
         for (int i = 0; i < size; i++) {
             System.out.print(items[toPrint] + " ");
+            System.out.println();
             toPrint = plusOne(toPrint);
         }
-        System.out.println();
+
     }
     /**Removes and returns the item at the front of the deque.
      *  If no such item exists, returns null.*/
