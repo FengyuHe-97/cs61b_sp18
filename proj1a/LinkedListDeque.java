@@ -26,12 +26,12 @@ public class LinkedListDeque<T> {
         size = 0;
     }
 
-    public LinkedListDeque(T item){
-        sentinel= new ItemNode(null, null,null);
-        sentinel.next=new ItemNode(sentinel, item, sentinel);
-        sentinel.prev=sentinel.next;
-        size=1;
-    }
+//    public LinkedListDeque(T item){
+//        sentinel= new ItemNode(null, null,null);
+//        sentinel.next=new ItemNode(sentinel, item, sentinel);
+//        sentinel.prev=sentinel.next;
+//        size=1;
+//    }
 
     public void addFirst(T item){
         sentinel.next= new ItemNode(sentinel, item, sentinel.next);
@@ -70,7 +70,7 @@ public class LinkedListDeque<T> {
         }
         T toRemove=sentinel.next.item;
         sentinel.next=sentinel.next.next;
-        sentinel.next.next.prev=sentinel;
+        sentinel.next.prev=sentinel;
         return toRemove;
     }
 
