@@ -12,8 +12,8 @@ public class ArrayDeque<T>{
     public ArrayDeque(){
          items=(T []) new Object[8];
          size=0;
-         nextFirst=0;
-         nextLast=1;
+         nextFirst=1;
+         nextLast=2;
     }
 
     /** Return true if deque is full, false otherwise. */
@@ -108,7 +108,7 @@ public class ArrayDeque<T>{
         }
         nextLast=minusOne(nextLast);
         T toRemove=items[nextLast];
-   //     items[nextLast] = null;
+    //    items[nextLast] = null;
         size--;
         if (isSparse()) {
             resize(items.length/2);
