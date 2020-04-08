@@ -64,7 +64,7 @@ public class ArrayDeque<T>{
             resize(size*2);
         }
         items[nextLast]=item;
-        nextFirst=plusOne(nextLast);
+        nextLast=plusOne(nextLast);
         size++;
     }
 
@@ -92,7 +92,7 @@ public class ArrayDeque<T>{
         }
         nextFirst=plusOne(nextFirst);
         T toRemove=items[nextFirst];
-   //     items[nextFirst] = null;
+        items[nextFirst] = null;
         size--;
         if (isSparse()) {
             resize(items.length/2);
@@ -108,7 +108,7 @@ public class ArrayDeque<T>{
         }
         nextLast=minusOne(nextLast);
         T toRemove=items[nextLast];
-    //    items[nextLast] = null;
+        items[nextLast] = null;
         size--;
         if (isSparse()) {
             resize(items.length/2);
