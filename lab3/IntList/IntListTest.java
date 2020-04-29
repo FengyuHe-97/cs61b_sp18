@@ -1,7 +1,6 @@
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-
 public class IntListTest {
 
     /**
@@ -9,6 +8,17 @@ public class IntListTest {
      * method. The main point of this is to convince you that
      * assertEquals knows how to handle IntLists just fine.
      */
+
+    @Test
+    public  void testReverse() {
+        IntList A = IntList.of(1, 2, 3);
+        IntList B = null;
+        IntList reverseA = IntList.reverse(A);
+        IntList reverseB = IntList.reverse(B);
+        assertNotEquals(IntList.of(1, 2, 3), A);
+        assertEquals(IntList.of(3, 2, 1), reverseA);
+        assertEquals(null, reverseB);
+    }
 
     @Test
     public void testList() {
