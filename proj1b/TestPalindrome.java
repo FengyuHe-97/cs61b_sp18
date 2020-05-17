@@ -17,7 +17,7 @@ public class TestPalindrome {
     }
 
     @Test
-    public void testIsPalindrome(){
+    public void testIsPalindrome() {
         assertFalse("Not a palindrome.", palindrome.isPalindrome("cat"));
         assertFalse("Not a palindrome.", palindrome.isPalindrome("Aa"));
         assertTrue(palindrome.isPalindrome(" "));
@@ -25,7 +25,7 @@ public class TestPalindrome {
         assertTrue(palindrome.isPalindrome("a"));
         assertTrue(palindrome.isPalindrome("A"));
 
-        CharacterComparator offByOne= new OffByOne();
+        CharacterComparator offByOne = new OffByOne();
         assertFalse("Not a palindrome.", palindrome.isPalindrome("cat", offByOne));
         assertTrue(palindrome.isPalindrome("flake", offByOne));
     }

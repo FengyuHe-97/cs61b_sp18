@@ -10,10 +10,10 @@ public class ArrayDeque<T> implements Deque<T> {
 
     /** Creates an empty Array. */
     public ArrayDeque() {
-         items=(T []) new Object[8];
-         size=0;
-         nextFirst=1;
-         nextLast=2;
+        items = (T []) new Object[8];
+        size = 0;
+        nextFirst = 1;
+        nextLast = 2;
     }
 
     /** Return true if deque is full, false otherwise. */
@@ -21,7 +21,7 @@ public class ArrayDeque<T> implements Deque<T> {
         return size == items.length;
     }
     /** Return true if usage factor less than 25%, false otherwise. */
-    private boolean isSparse(){
+    private boolean isSparse() {
         return items.length >= 16 && size < (items.length / 4);
     }
 
@@ -50,37 +50,37 @@ public class ArrayDeque<T> implements Deque<T> {
 
     /** Inserts X into the front of the list. */
     @Override
-    public void addFirst(T item){
-        if(isFull()){
-            resize(size*2);
+    public void addFirst(T item) {
+        if (isFull()) {
+            resize(size * 2);
         }
-        items[nextFirst]=item;
-        nextFirst=minusOne(nextFirst);
+        items[nextFirst] = item;
+        nextFirst = minusOne(nextFirst);
         size++;
     }
 
     /** Inserts X into the back of the list. */
     @Override
     public void addLast(T item) {
-        if (isFull()){
-            resize(size*2);
+        if (isFull()) {
+            resize(size * 2);
         }
-        items[nextLast]=item;
-        nextLast=plusOne(nextLast);
+        items[nextLast] = item;
+        nextLast = plusOne(nextLast);
         size++;
     }
 
     /**Returns true if deque is empty, false otherwise.*/
     @Override
-    public boolean isEmpty(){
-        return size==0;
+    public boolean isEmpty() {
+        return size == 0;
     }
 
 
     /**Prints the items in the deque from first to last, separated by a space.*/
     @Override
-    public void printDeque(){
-        int toPrint= plusOne(nextFirst);
+    public void printDeque() {
+        int toPrint = plusOne(nextFirst);
         for (int i = 0; i < size; i++) {
             System.out.print(items[toPrint] + " ");
             System.out.println();
@@ -91,16 +91,16 @@ public class ArrayDeque<T> implements Deque<T> {
     /**Removes and returns the item at the front of the deque.
      *  If no such item exists, returns null.*/
     @Override
-    public T removeFirst(){
+    public T removeFirst() {
         if (size == 0) {
             return null;
         }
-        nextFirst=plusOne(nextFirst);
-        T toRemove=items[nextFirst];
+        nextFirst = plusOne(nextFirst);
+        T toRemove = items[nextFirst];
         items[nextFirst] = null;
         size--;
         if (isSparse()) {
-            resize(items.length/2);
+            resize(items.length / 2);
         }
         return toRemove;
     }
@@ -108,16 +108,16 @@ public class ArrayDeque<T> implements Deque<T> {
     /**Removes and returns the item at the back of the deque.
      * If no such item exists, returns null.*/
     @Override
-    public T removeLast(){
+    public T removeLast() {
         if (size == 0) {
             return null;
         }
-        nextLast=minusOne(nextLast);
-        T toRemove=items[nextLast];
+        nextLast = minusOne(nextLast);
+        T toRemove = items[nextLast];
         items[nextLast] = null;
         size--;
         if (isSparse()) {
-            resize(items.length/2);
+            resize(items.length / 2);
         }
         return toRemove;
     }

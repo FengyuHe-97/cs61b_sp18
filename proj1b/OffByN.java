@@ -1,11 +1,14 @@
-public class OffByN implements CharacterComparator{
+
+public class OffByN implements CharacterComparator {
 
     private  int N;
-    public OffByN(int n){
-        N=n;
+
+    public OffByN(int n) {
+        N = n;
     }
+
     @Override
-    public boolean equalChars(char x, char y){
+    public boolean equalChars(char x, char y) {
         return Math.abs((int) x - (int) y) == N;
     }
 }
