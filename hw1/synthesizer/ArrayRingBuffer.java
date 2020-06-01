@@ -1,5 +1,5 @@
 package synthesizer;
-import synthesizer.AbstractBoundedQueue;
+
 
 import java.util.Iterator;
 
@@ -77,11 +77,11 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue<T> {
 
     private class ArrayRingBufferIterator implements Iterator<T> {
 
-         private int ptr;
+        private int ptr;
 
-         public ArrayRingBufferIterator() {
-             ptr=first;
-    }
+        ArrayRingBufferIterator() {
+            ptr = first;
+        }
 
         @Override
         public boolean hasNext() {
@@ -89,9 +89,9 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue<T> {
         }
 
         @Override
-        public T next(){
-             T returnItem = rb[ptr];
-             ptr+=1;
+        public T next() {
+            T returnItem = rb[ptr];
+            ptr += 1;
             if (ptr == capacity) {
                 ptr = 0;
             }

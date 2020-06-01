@@ -14,8 +14,8 @@ public interface BoundedQueue<T> extends Iterable {
      * is the buffer empty (fillCount equals zero)?
      * @return
      */
-    default boolean isEmpty(){
-        return fillCount()==0;
+    default boolean isEmpty() {
+        return fillCount() == 0;
     }
 
     /**
@@ -23,7 +23,7 @@ public interface BoundedQueue<T> extends Iterable {
      * @return
      */
     default boolean isFull() {
-        return capacity()==fillCount();
+        return capacity() == fillCount();
     }
 
     @Override
