@@ -93,9 +93,9 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue<T> {
         public T next() {
             T returnItem = rb[ptr];
             ptr += 1;
-//            if (ptr == capacity) {
-//                ptr = 0;
-//            }
+            if (ptr == capacity) {
+                ptr = 0;
+            }
             return returnItem;
         }
     }
