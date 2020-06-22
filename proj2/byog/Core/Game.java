@@ -1,5 +1,7 @@
 package byog.Core;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 
@@ -32,7 +34,23 @@ public class Game {
         // and return a 2D tile representation of the world that would have been
         // drawn if the same inputs had been given to playWithKeyboard().
 
-        TETile[][] finalWorldFrame = null;
-        return finalWorldFrame;
+        long seed;
+
+        MapGenerator map = new MapGenerator();
+        String pattern3 = "(N)(\\d+)(S)";
+        Pattern r3 = Pattern.compile(pattern3);
+        Matcher m3 = r3.matcher(input);
+        if (m3.find()) {
+            seed = Long.parseLong(m3.group(2));
+            map.initializeTheWorld(WIDTH, HEIGHT);
+            map.generateWorld(seed);
+
+            return map.world;
+
+        }
+
+        return null;
+
+
     }
 }

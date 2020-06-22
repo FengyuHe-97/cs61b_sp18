@@ -12,13 +12,9 @@ public class MapGenerator {
     private static int WIDTH;
     private static int HEIGHT;
 
-    private static int pointX;
-    private static int pointY;
-
     private static long SEED;
     private static Random RANDOM = new Random(SEED);
 
-    public static TERenderer ter = new TERenderer();
     public static TETile[][] world;
 
     /**
@@ -26,7 +22,6 @@ public class MapGenerator {
      */
     LinkedListDeque<Position> pendingTiles  = new LinkedListDeque<>();
 
-    //private static final String[] TOWARDS = {"up", "down", "left", "right"};
 
     public static void getSEED(String[] args) {
         // TODO
@@ -55,13 +50,35 @@ public class MapGenerator {
     }
 
     public void demo() {
-        Position p = new Position(30,30,"down", "hallway");
+        Position p = new Position(20, 20, "down", "hallway");
         generateRoom(p);
 
-        while(!pendingTiles.isEmpty()){
+        while (!pendingTiles.isEmpty()) {
             removePendingTiles(pendingTiles.removeFirst());
         }
+
+        world[0][10] = Tileset.LOCKED_DOOR;
     }
+
+    public void generateWorld(long seed) {
+        SEED = seed;
+        Position p = new Position(0, 10, "right", "hallway");
+        generateRoom(p);
+
+        while (!pendingTiles.isEmpty()) {
+            removePendingTiles(pendingTiles.removeFirst());
+        }
+
+        world[0][10] = Tileset.LOCKED_DOOR;
+    }
+
+
+
+    public void fromStringToSeed(String input){
+
+
+    }
+
 
     public class Position {
         public int x;
@@ -100,6 +117,26 @@ public class MapGenerator {
         int roomWidth = RandomUtils.uniform(RANDOM, 4, 9);
         int roomHeight = RandomUtils.uniform(RANDOM, 4, 9);
         int startX, startY;
+        int wallOpeningX = p.x;
+        int wallOpeningY = p.y;
+
+        //可以写成一个method，但是懒得改
+        switch (p.towards) {
+            case "up":
+                p.y += 1;
+                break;
+            case "down":
+                p.y -= 1;
+                break;
+            case "left":
+                p.x -= 1;
+                break;
+            case "right":
+                p.x += 1;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid towards: " + p.towards);
+        }
         switch (p.towards) {
             case "up":
                 startX = p.x - RandomUtils.uniform(RANDOM, 1, roomWidth - 2);
@@ -121,9 +158,11 @@ public class MapGenerator {
                 throw new IllegalArgumentException("Invalid towards: " + p.towards);
         }
 
+
+
         if(isConflict(startX, startY, startX + roomWidth - 1, startY + roomHeight - 1)){
             // 若有冲突，直接填充墙孔
-            world[p.x][p.y] = Tileset.WALL;
+            world[wallOpeningX][wallOpeningY] = Tileset.WALL;
         } else {
             CoverArea ca = new CoverArea(startX, startY,startX + roomWidth - 1, startY + roomHeight - 1);
             // 若无冲突， 填充地板和四个墙壁
@@ -163,6 +202,28 @@ public class MapGenerator {
 
     public void drawVerticalHallway(Position p) {
         int length = RandomUtils.uniform(RANDOM, 4, 9);
+
+        int wallOpeningX = p.x;
+        int wallOpeningY = p.y;
+
+        switch (p.towards) {
+            case "up":
+                p.y += 1;
+                break;
+            case "down":
+                p.y -= 1;
+                break;
+            case "left":
+                p.x -= 1;
+                break;
+            case "right":
+                p.x += 1;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid towards: " + p.towards);
+        }
+
+
         int startX = p.x;
         int startY = p.y;
         int endX, endY;
@@ -180,15 +241,22 @@ public class MapGenerator {
             default:
                 throw new IllegalArgumentException("Invalid towards: " + p.towards);
         }
+
+
         if (isConflict(startX - 1, startY, endX + 1, endY)) {
             // 若有冲突，直接填充墙孔
-            world[p.x][p.y] = Tileset.WALL;
+            world[wallOpeningX][wallOpeningY] = Tileset.WALL;
         } else {
-            // 若无冲突， 填充地板和两侧墙壁
+            // 若无冲突， 填充地板和四侧墙壁，再把入口改为地砖
             fillTiles(startX, startY, endX, endY, Tileset.FLOOR);
 
             fillTiles(startX - 1, startY, endX - 1, endY, Tileset.WALL);
             fillTiles(startX + 1, startY, endX + 1, endY, Tileset.WALL);
+            //复杂了，不想改
+            fillTiles(startX - 1, startY,startX + 1, startY, Tileset.WALL);
+            fillTiles(startX - 1, endY,startX + 1, endY, Tileset.WALL);
+            world[p.x][p.y] = Tileset.FLOOR;
+
             //打洞
             CoverArea ca = new CoverArea(startX - 1, startY,endX + 1, endY);
             generatePendingTiles( ca,  p, RandomUtils.uniform(RANDOM, 2, 3));
@@ -197,6 +265,27 @@ public class MapGenerator {
 
     public void drawHorizontalHallway(Position p) {
         int length = RandomUtils.uniform(RANDOM, 4, 9);
+
+        int wallOpeningX = p.x;
+        int wallOpeningY = p.y;
+
+        switch (p.towards) {
+            case "up":
+                p.y += 1;
+                break;
+            case "down":
+                p.y -= 1;
+                break;
+            case "left":
+                p.x -= 1;
+                break;
+            case "right":
+                p.x += 1;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid towards: " + p.towards);
+        }
+
         int startX = p.x;
         int startY = p.y;
         int endX, endY;
@@ -213,15 +302,20 @@ public class MapGenerator {
             default:
                 throw new IllegalArgumentException("Invalid towards: " + p.towards);
         }
+
+
         if (isConflict(startX, startY - 1, endX, endY + 1)) {
             // 若有冲突，直接填充墙孔
-            world[p.x][p.y] = Tileset.WALL;
+            world[wallOpeningX][wallOpeningY] = Tileset.WALL;
         } else {
             // 若无冲突， 填充地板和两侧墙壁
             fillTiles(startX, startY, endX, endY, Tileset.FLOOR);
 
             fillTiles(startX, startY - 1, endX, endY - 1, Tileset.WALL);
             fillTiles(startX, startY + 1, endX, endY + 1, Tileset.WALL);
+            fillTiles(startX, startY - 1, startX, startY + 1, Tileset.WALL);
+            fillTiles(endX, startY - 1, endX, startY + 1, Tileset.WALL);
+            world[p.x][p.y] = Tileset.FLOOR;
 
             //打洞
             CoverArea ca = new CoverArea(startX, startY - 1,endX, endY + 1);
@@ -230,22 +324,8 @@ public class MapGenerator {
     }
 
 //    public void generateLHallway(){
-//        // todo
-//    }
-//
-//
-//        switch (p.region) {
-//            case "room":
-//                generatePendingTilesForRoom();
-//                break;
-//            case "hallway":
-//                generatePendingTilesForHallway();
-//                break;
-//            default:
-//                throw new IllegalArgumentException("Invalid region: " + p.region);
+
 //        }
-
-
 
     //取出一个待处理墙洞
     public void removePendingTiles(Position p){
@@ -314,41 +394,7 @@ public class MapGenerator {
      */
     public String chooseRegionForHallway(String towards, Position p){
         String returnRegion;
-        int pairA,pairB;
-        switch(towards){
-            case "up":
-                pairA = 1;
-                break;
-            case "down":
-                pairA = 4;
-                break;
-            case "left":
-                pairA = 2;
-                break;
-            case "right":
-                pairA = 3;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid towards: " + towards);
-        }
-
-        switch(p.towards){
-            case "up":
-                pairB = 1;
-                break;
-            case "down":
-                pairB = 4;
-                break;
-            case "left":
-                pairB = 2;
-                break;
-            case "right":
-                pairB = 3;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid towards: " + p.towards);
-        }
-        if(pairA + pairB == 5) {
+        if(towards == p.towards) {
             returnRegion = "room";
         } else {
             returnRegion = "hallway";
@@ -366,8 +412,6 @@ public class MapGenerator {
                     x = RandomUtils.uniform(RANDOM, ca.startX + 1, ca.endX - 1);
                 }
                 y = ca.endY;
-                world[x][y] = Tileset.FLOOR;
-                y += 1;
                 break;
             case "down":
                 if(ca.startX + 1 == ca.endX - 1 ){ //random（1，1）这种情况会报错，这里处理方法比较粗糙
@@ -376,8 +420,6 @@ public class MapGenerator {
                     x = RandomUtils.uniform(RANDOM, ca.startX + 1, ca.endX - 1);
                 }
                 y = ca.startY;
-                world[x][y] = Tileset.FLOOR;
-                y -= 1;
                 break;
             case "left":
                 x = ca.startX;
@@ -386,8 +428,6 @@ public class MapGenerator {
                 }else {
                     y = RandomUtils.uniform(RANDOM, ca.startY + 1, ca.endY - 1);
                 }
-                world[x][y] = Tileset.FLOOR;
-                x -= 1;
                 break;
             case "right":
                 x = ca.endX;
@@ -396,13 +436,12 @@ public class MapGenerator {
                 }else {
                     y = RandomUtils.uniform(RANDOM, ca.startY + 1, ca.endY - 1);
                 }
-                world[x][y] = Tileset.FLOOR;
-                x +=1;
                 break;
             default:
                 throw new IllegalArgumentException("Invalid towards: " + towards);
         }
 
+        world[x][y] = Tileset.FLOOR;
         Position p = new Position(x,y,towards, region);
         pendingTiles.addLast(p);
     }
@@ -429,9 +468,4 @@ public class MapGenerator {
             }
         }
     }
-
-
-
-
-
 }
