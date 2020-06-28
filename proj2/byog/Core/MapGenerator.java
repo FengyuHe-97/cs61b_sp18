@@ -77,7 +77,7 @@ public class MapGenerator {
             removePendingTiles(pendingTiles.removeFirst());
         }
 
-        world[0][10] = Tileset.LOCKED_DOOR;
+        world[1][10] = Tileset.LOCKED_DOOR;
     }
 
 
