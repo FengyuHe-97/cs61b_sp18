@@ -1,11 +1,13 @@
 package byog.Core;
 
 import byog.TileEngine.*;
-import byog.lab6.MemoryGame;
 import edu.princeton.cs.introcs.StdDraw;
 import java.util.Random;
 import byog.Core.LinkedListDeque;
 import java.util.ArrayList;
+
+import java.awt.Color;
+import java.awt.Font;
 
 public class MapGenerator {
 
@@ -17,39 +19,46 @@ public class MapGenerator {
 
     public static TETile[][] world;
 
+    public static TERenderer ter = new TERenderer();
+
+    /*玩家player所在位置*/
+    static int x = 0;
+    static int y = 0;
+
     /**
      * 其实没必要用LinkedListDeque,用java.util.ArrayList就可以但我想试一下
      */
-    LinkedListDeque<Position> pendingTiles  = new LinkedListDeque<>();
+    static LinkedListDeque<Position> pendingTiles  = new LinkedListDeque<>();
 
 
-    public static void getSEED(String[] args) {
-        // TODO
-        if (args.length < 3) {
-            throw new RuntimeException("Please enter a correct seed");
-        }
-
-        int seed = Integer.parseInt(args[0]);
+    /**
+     * 确定 SEED
+     */
+    public static void getSEED(long seed) {
         SEED = seed;
     }
 
     /**
-     * 初始化世界
+     * 确定 WIDTH 和 HEIGHT
      */
-    public void initializeTheWorld(int width, int height){
-        //ter.initialize(WIDTH, HEIGHT);
+    public static void getSizeOfWorld(int width, int height){
         WIDTH = width;
         HEIGHT = height;
+    }
+
+    /**
+     * 初始化世界,给world赋值nothing
+     */
+    public static void initializeTheWorld(){
         world = new TETile[WIDTH][HEIGHT];
         for (int x = 0; x < WIDTH; x += 1) {
             for (int y = 0; y < HEIGHT; y += 1) {
                 world[x][y] = Tileset.NOTHING;
             }
         }
-
     }
 
-    public void demo() {
+    public static void demo() {
         Position p = new Position(20, 20, "down", "hallway");
         generateRoom(p);
 
@@ -60,8 +69,7 @@ public class MapGenerator {
         world[0][10] = Tileset.LOCKED_DOOR;
     }
 
-    public void generateWorld(long seed) {
-        SEED = seed;
+    public static void generateWorld() {
         Position p = new Position(0, 10, "right", "hallway");
         generateRoom(p);
 
@@ -80,7 +88,7 @@ public class MapGenerator {
     }
 
 
-    public class Position {
+    private static class Position {
         public int x;
         public int y;
         public String towards;
@@ -97,7 +105,7 @@ public class MapGenerator {
     /**
      * 包含区域左下和右上坐标的子类
      */
-    private class CoverArea {
+    private static class CoverArea {
         private int startX;
         private int startY;
         private int endX;
@@ -113,7 +121,7 @@ public class MapGenerator {
     }
 
 
-    public void generateRoom(Position p){
+    public static void generateRoom(Position p){
         int roomWidth = RandomUtils.uniform(RANDOM, 4, 9);
         int roomHeight = RandomUtils.uniform(RANDOM, 4, 9);
         int startX, startY;
@@ -131,6 +139,7 @@ public class MapGenerator {
             case "left":
                 p.x -= 1;
                 break;
+
             case "right":
                 p.x += 1;
                 break;
@@ -181,7 +190,7 @@ public class MapGenerator {
         }
     }
 
-    public void generateHallway(Position p){
+    public static void generateHallway(Position p){
         switch (p.towards) {
             case "up":
                 drawVerticalHallway(p);
@@ -200,7 +209,7 @@ public class MapGenerator {
         }
     }
 
-    public void drawVerticalHallway(Position p) {
+    public static void drawVerticalHallway(Position p) {
         int length = RandomUtils.uniform(RANDOM, 4, 9);
 
         int wallOpeningX = p.x;
@@ -263,7 +272,7 @@ public class MapGenerator {
         }
     }
 
-    public void drawHorizontalHallway(Position p) {
+    public static void drawHorizontalHallway(Position p) {
         int length = RandomUtils.uniform(RANDOM, 4, 9);
 
         int wallOpeningX = p.x;
@@ -328,7 +337,7 @@ public class MapGenerator {
 //        }
 
     //取出一个待处理墙洞
-    public void removePendingTiles(Position p){
+    public static void removePendingTiles(Position p){
         switch (p.region) {
             case "room":
                 generateRoom(p);
@@ -342,7 +351,13 @@ public class MapGenerator {
     }
 
 
-    public void generatePendingTiles(CoverArea ca, Position p,int num){
+    /**
+     * 选择地方生成墙洞并放进pending List
+     * @param ca
+     * @param p
+     * @param num
+     */
+    public static void generatePendingTiles(CoverArea ca, Position p,int num){
         //排除一个不可能的朝向
         ArrayList<String> legalTowards = new ArrayList<String>();
         String region;
@@ -387,12 +402,12 @@ public class MapGenerator {
     }
 
     /**
-     * 用拼图的逻辑判断该生成房间还是走廊
+     * 为走廊上的墙洞判断该生成房间还是走廊
      * @param towards
      * @param p
      * @return
      */
-    public String chooseRegionForHallway(String towards, Position p){
+    public static String chooseRegionForHallway(String towards, Position p){
         String returnRegion;
         if(towards == p.towards) {
             returnRegion = "room";
@@ -402,7 +417,13 @@ public class MapGenerator {
         return returnRegion;
     }
 
-    public void randomGetHole(CoverArea ca,String towards, String region){
+    /**
+     * 随机在墙上打洞
+     * @param ca
+     * @param towards
+     * @param region
+     */
+    public static void randomGetHole(CoverArea ca,String towards, String region){
         int x,y;
         switch (towards) {
             case "up":
@@ -447,7 +468,15 @@ public class MapGenerator {
     }
 
 
-    public boolean isConflict(int startX, int startY, int endX, int endY){
+    /**
+     * 判断是否冲突
+     * @param startX
+     * @param startY
+     * @param endX
+     * @param endY
+     * @return
+     */
+    public static boolean isConflict(int startX, int startY, int endX, int endY){
         if(startX < 0 || startY < 0 || endX > WIDTH - 1 || endY > HEIGHT - 1 ){
             return true;
         }
@@ -461,11 +490,167 @@ public class MapGenerator {
         return false;
     }
 
-    public void fillTiles(int startX, int startY, int endX, int endY, TETile t ){
+    public static void fillTiles(int startX, int startY, int endX, int endY, TETile t ){
         for (int x = startX; x <= endX; x += 1) {
             for (int y = startY; y <=  endY; y += 1) {
                 world[x][y] = t;
             }
         }
     }
+
+    /*游戏开始前的主菜单*/
+    static  void drawFrame() {
+        StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
+        StdDraw.setXscale(0, WIDTH);
+        StdDraw.setYscale(0, HEIGHT);
+        StdDraw.enableDoubleBuffering();
+
+        int midWidth = WIDTH / 2;
+        int midHeight = HEIGHT / 2;
+
+        StdDraw.clear();
+        StdDraw.clear(Color.black);
+
+        //Draw the GUI
+
+        Font bigFont = new Font("Monaco", Font.BOLD, 60);
+        StdDraw.setFont(bigFont);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.text(midWidth, HEIGHT - 10, "CS61B: THE GAME");
+
+
+        //Draw the actual text
+        Font samallFont = new Font("Monaco", Font.ROMAN_BASELINE, 30);
+        StdDraw.setFont(samallFont);
+        StdDraw.text(midWidth, midHeight - 5, "New Game (N)");
+        StdDraw.text(midWidth, midHeight - 8, "Load Game (L)");
+        StdDraw.text(midWidth, midHeight - 11, "Quit (Q)");
+        StdDraw.show();
+    }
+
+    /*在屏幕中间显示文字（白色）*/
+    static void drawText(String s) {
+        StdDraw.clear(Color.black);
+        Font smallFont = new Font("Monaco", Font.BOLD, 35);
+        StdDraw.setFont(smallFont);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.text(WIDTH / 2, HEIGHT / 2, s);
+        StdDraw.show();
+    }
+
+    /**
+     * 在屏幕中间显示文字（自选颜色）
+     */
+    static void drawText(String s, Color color) {
+        StdDraw.clear(Color.black);
+        Font smallFont = new Font("Monaco", Font.BOLD, 35);
+        StdDraw.setFont(smallFont);
+        StdDraw.setPenColor(color);
+        StdDraw.text(WIDTH / 2, HEIGHT / 2, s);
+        StdDraw.show();
+    }
+
+
+    /*用键盘作为输入初次游戏时对玩家按键的响应*/
+    private static void move() {
+        //setDoorLocation();
+        setPlayerLocation();
+        while (true) {
+            //todo:tileDescription();
+            if (!StdDraw.hasNextKeyTyped()) {
+                continue;
+            }
+            char key = StdDraw.nextKeyTyped();
+            switch (key) {
+                case 'w':
+                    if (!(world[x][y + 1] == Tileset.WALL)) {
+                        if (world[x][y + 1] == Tileset.LOCKED_DOOR) {
+                            drawText("YOU WIN !!!",Color.yellow);
+                            return;
+                        }
+                        world[x][y] = Tileset.FLOOR;
+                        y += 1;
+                        world[x][y] = Tileset.PLAYER;
+                        ter.renderFrame(world);
+                    }
+                    break;
+                case 's':
+                    if (!(world[x][y - 1] == Tileset.WALL)) {
+                        if (world[x][y - 1] == Tileset.LOCKED_DOOR) {
+                            drawText("YOU WIN !!!",Color.yellow);
+                            return;
+                        }
+                        world[x][y] = Tileset.FLOOR;
+                        y -= 1;
+                        world[x][y] = Tileset.PLAYER;
+                        ter.renderFrame(world);
+                    }
+                    break;
+                case 'a':
+                    if (!(world[x - 1][y] == Tileset.WALL)) {
+                        if (world[x - 1][y] == Tileset.LOCKED_DOOR) {
+                            drawText("YOU WIN !!!",Color.yellow);
+                            return;
+                        }
+                        world[x][y] = Tileset.FLOOR;
+                        x -= 1;
+                        world[x][y] = Tileset.PLAYER;
+                        ter.renderFrame(world);
+                    }
+                    break;
+                case 'd':
+                    if (!(world[x + 1][y] == Tileset.WALL)) {
+                        if (world[x + 1][y] == Tileset.LOCKED_DOOR) {
+                            drawText("YOU WIN !!!",Color.yellow);
+                            return;
+                        }
+                        world[x][y] = Tileset.FLOOR;
+                        x += 1;
+                        world[x][y] = Tileset.PLAYER;
+                        ter.renderFrame(world);
+                    }
+                    break;
+/*                case 'q': saveWorld(new Info(Game.SUBSEED, x, y));
+                    System.exit(0);
+                    break;*/
+                default:
+            }
+        }
+    }
+
+    public static void setPlayerLocation(){
+        while (true) {
+            x = RandomUtils.uniform(RANDOM, 0, WIDTH - 1);
+            y = RandomUtils.uniform(RANDOM, 0, HEIGHT - 1);
+            if(world[x][y] == Tileset.FLOOR){
+                world[x][y] = Tileset.PLAYER;
+                break;
+            }
+        }
+        ter.renderFrame(world);
+    }
+
+    public static void run(){
+        prepare();
+        generateWorld();
+
+        ter.renderFrame(world);
+
+        move();
+    }
+
+    /**
+     * 用键盘输入时初次运行游戏对世界的初始化，seed来自键盘输入
+     */
+    private static void prepare() {
+        // initialize the tile rendering engine with a window of size WIDTH x HEIGHT
+        ter.initialize(WIDTH, HEIGHT);
+        initializeTheWorld();
+        RANDOM = new Random(SEED);
+    }
+
+
+
 }
+
+

@@ -14,14 +14,13 @@ public class MapVisualTest {
         TERenderer ter = new TERenderer();
         ter.initialize(WIDTH, HEIGHT);
 
-        MapGenerator map = new MapGenerator();
+        MapGenerator.getSizeOfWorld(WIDTH, HEIGHT);
+        MapGenerator.initializeTheWorld();
 
-        map.initializeTheWorld(WIDTH, HEIGHT);
-
-        map.demo();
-
+        MapGenerator.demo();
 
 
-        ter.renderFrame(map.world);
+
+        ter.renderFrame(MapGenerator.world);
     }
 }
