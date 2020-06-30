@@ -2,9 +2,9 @@ package hw2;
 
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
-public class Percolation{
+public class Percolation {
     private int N;
-    private int OpenNumber = 0;
+    private int openNumber = 0;
     private String[][] model;
     private WeightedQuickUnionUF wqu;
     private int TOP;
@@ -24,8 +24,9 @@ public class Percolation{
         TOP = N * N;
 
         for (int i = 0; i < N; i++) {
-            for(int j = 0; j < N; j++)
-            model[i][j] = "Blocked";
+            for (int j = 0; j < N; j++) {
+                model[i][j] = "Blocked";
+            }
         }
     }
 
@@ -34,26 +35,26 @@ public class Percolation{
      */
     public void open(int row, int col) {
         validate(row, col);
-        if (model[row][col] == "Blocked"){
+        if (model[row][col].equals("Blocked")) {
             model[row][col] = "Open";
-            OpenNumber += 1;
+            openNumber += 1;
 
-            if (row == 0) {//up
+            if (row == 0) { //up
                 wqu.union(TOP, xyTo1D(row, col));
             } else if (model[row - 1][col].equals("Open")) {
                 wqu.union(xyTo1D(row, col), xyTo1D(row - 1, col));
             }
-            if (row != N - 1) {//down
+            if (row != N - 1) { //down
                 if (model[row + 1][col].equals("Open")) {
                     wqu.union(xyTo1D(row, col), xyTo1D(row + 1, col));
                 }
             }
-            if (col != 0) {//left
+            if (col != 0) { //left
                 if (model[row][col - 1].equals("Open")) {
                     wqu.union(xyTo1D(row, col), xyTo1D(row, col - 1));
                 }
             }
-            if (col != N - 1) {//right
+            if (col != N - 1) { //right
                 if (model[row][col + 1].equals("Open")) {
                     wqu.union(xyTo1D(row, col), xyTo1D(row, col + 1));
                 }
@@ -79,7 +80,7 @@ public class Percolation{
      */
     public boolean isOpen(int row, int col) {
         validate(row, col);
-        return model[row][col] == "Open";
+        return model[row][col].equals("Open");
     }
 
     /**
@@ -87,7 +88,7 @@ public class Percolation{
      */
     public boolean isFull(int row, int col) {
         validate(row, col);
-        if(!isOpen(row, col)){
+        if (!isOpen(row, col)) {
             return false;
         }
         return wqu.find(TOP) == wqu.find(xyTo1D(row, col));
@@ -97,15 +98,15 @@ public class Percolation{
      *  number of open sites
      */
     public int numberOfOpenSites() {
-        return OpenNumber;
+        return openNumber;
     }
 
     /**
      * does the system percolate?
      */
     public boolean percolates()  {
-        for(int i = 0; i < N; i +=1) {
-            if (isFull( N - 1,  i)){
+        for (int i = 0; i < N; i += 1) {
+            if (isFull(N - 1,  i)) {
                 return true;
             }
         }
