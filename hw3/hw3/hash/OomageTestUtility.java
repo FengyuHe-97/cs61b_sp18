@@ -17,7 +17,7 @@ public class OomageTestUtility {
             int bucketNum = (o.hashCode() & 0x7FFFFFFF) % M;
             if (hm.containsKey(bucketNum)) {
                 int value = hm.get(bucketNum);
-                hm.put(bucketNum, ++value);//出现一个属于这个包的，value + 1
+                hm.put(bucketNum, ++value); //出现一个属于这个包的，value + 1
                 continue;
             }
             hm.put(bucketNum, 1);
