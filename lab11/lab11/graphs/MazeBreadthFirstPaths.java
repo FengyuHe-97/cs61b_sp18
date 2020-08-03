@@ -38,10 +38,6 @@ public class MazeBreadthFirstPaths extends MazeExplorer {
             int v = waitingQueue.remove();
             announce();
             if (v == t) {
-                targetFound = true;
-            }
-
-            if (targetFound) {
                 return;
             }
             for (int w : maze.adj(v)) {
