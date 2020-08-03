@@ -14,10 +14,8 @@ public class MazeBreadthFirstPaths extends MazeExplorer {
     */
     private int s;
     private int t;
-    private boolean targetFound = false;
     private Maze maze;
 
-    private static final int INFINITY = Integer.MAX_VALUE;
 
     public MazeBreadthFirstPaths(Maze m, int sourceX, int sourceY, int targetX, int targetY) {
         super(m);//https://blog.csdn.net/yongbutingxide/article/details/82669054
@@ -33,6 +31,7 @@ public class MazeBreadthFirstPaths extends MazeExplorer {
         Queue<Integer> waitingQueue = new LinkedList<>(); // Create and initialize a Queue using a LinkedList
 
         waitingQueue.add(s);
+        marked[s] = true;
 
         while (!waitingQueue.isEmpty()) {
             int v = waitingQueue.remove();
@@ -45,7 +44,7 @@ public class MazeBreadthFirstPaths extends MazeExplorer {
                     edgeTo[w] = v;
                     distTo[w] = distTo[v] + 1;
                     marked[w] = true;
-                    //waitingQueue.add(w);
+                    waitingQueue.add(w);
                 }
             }
         }
