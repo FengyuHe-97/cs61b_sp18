@@ -45,7 +45,7 @@ public class MazeBreadthFirstPaths extends MazeExplorer {
                     edgeTo[w] = v;
                     distTo[w] = distTo[v] + 1;
                     marked[w] = true;
-                    waitingQueue.add(w);
+                    //waitingQueue.add(w);
                 }
             }
         }
