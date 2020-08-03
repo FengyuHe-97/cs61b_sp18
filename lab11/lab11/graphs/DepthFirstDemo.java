@@ -13,6 +13,7 @@ public class DepthFirstDemo {
         int startY = 1;
         int targetX = maze.N();
         int targetY = maze.N();
+        System.out.println();
 
         MazeExplorer mdfp = new MazeDepthFirstPaths(maze, startX, startY, targetX, targetY);
         mdfp.solve();
