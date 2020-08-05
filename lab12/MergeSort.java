@@ -1,14 +1,18 @@
 import edu.princeton.cs.algs4.Queue;
 
+import java.util.Iterator;
+
 public class MergeSort {
     /**
      * Removes and returns the smallest item that is in q1 or q2.
      *
-     * The method assumes that both q1 and q2 are in sorted order, with the smallest item first. At
+     * The method assumes that both q1 and q2 are in sorted order,
+     * with the smallest item first. At
      * most one of q1 or q2 can be empty (but both cannot be empty).
      *
      * @param   q1  A Queue in sorted order from least to greatest.
      * @param   q2  A Queue in sorted order from least to greatest.
+     * @param <Item> something Comparable
      * @return      The smallest item that is in q1 or q2.
      */
     private static <Item extends Comparable> Item getMin(
@@ -18,12 +22,13 @@ public class MergeSort {
         } else if (q2.isEmpty()) {
             return q1.dequeue();
         } else {
-            // Peek at the minimum item in each queue (which will be at the front, since the
-            // queues are sorted) to determine which is smaller.
+             /*Peek at the minimum item in each queue
+             (which will be at the front, since the
+             queues are sorted) to determine which is smaller.*/
             Comparable q1Min = q1.peek();
             Comparable q2Min = q2.peek();
             if (q1Min.compareTo(q2Min) <= 0) {
-                // Make sure to call dequeue, so that the minimum item gets removed.
+            // Make sure to call dequeue, so that the minimum item gets removed.
                 return q1.dequeue();
             } else {
                 return q2.dequeue();
@@ -34,8 +39,20 @@ public class MergeSort {
     /** Returns a queue of queues that each contain one item from items. */
     private static <Item extends Comparable> Queue<Queue<Item>>
             makeSingleItemQueues(Queue<Item> items) {
-        // Your code here!
-        return null;
+        Queue<Queue<Item>> queues = new Queue<>();
+
+        Iterator<Item> it = items.iterator();
+        while (it.hasNext())  {
+            Queue<Item> temp = new Queue<>();
+            temp.enqueue(it.next());
+            queues.enqueue(temp);
+        }
+    /*    for (Item i: items) { //copyRight lujie
+            Queue<Item> q = new Queue<>();
+            q.enqueue(i);
+            toReturn.enqueue(q);
+        }*/
+        return queues;
     }
 
     /**
@@ -53,14 +70,76 @@ public class MergeSort {
      */
     private static <Item extends Comparable> Queue<Item> mergeSortedQueues(
             Queue<Item> q1, Queue<Item> q2) {
-        // Your code here!
-        return null;
+        Queue<Item> queues = new Queue<>();
+        while (!(q1.isEmpty() && q2.isEmpty())) {
+            queues.enqueue(getMin(q1,  q2));
+        }
+        return queues;
     }
 
     /** Returns a Queue that contains the given items sorted from least to greatest. */
     public static <Item extends Comparable> Queue<Item> mergeSort(
             Queue<Item> items) {
-        // Your code here!
-        return items;
+        if (items.size() <= 1) {
+            return items;
+        }
+        Queue<Queue<Item>> singleItemQueue = makeSingleItemQueues(items);
+        int halfSize = items.size() / 2;
+        Queue<Item> leftQueue = new Queue<>();
+        for (int i = 0; i < halfSize; i++) {
+            leftQueue.enqueue(singleItemQueue.dequeue().dequeue());
+        }
+        Queue<Item> rightQueue = new Queue<>();
+        while (!singleItemQueue.isEmpty()) {
+            rightQueue.enqueue(singleItemQueue.dequeue().dequeue());
+        }
+        Queue<Item> q1 = mergeSort(leftQueue);
+        Queue<Item> q2 = mergeSort(rightQueue);
+        return mergeSortedQueues(q1, q2);
+    }
+
+    public static void main(String[] args) {
+        Queue<String> alphabet = new Queue<>();
+
+
+        alphabet.enqueue("q");
+        alphabet.enqueue("w");
+        alphabet.enqueue("e");
+        alphabet.enqueue("r");
+        alphabet.enqueue("t");
+        alphabet.enqueue("j");
+        alphabet.enqueue("y");
+        alphabet.enqueue("u");
+        alphabet.enqueue("i");
+        alphabet.enqueue("o");
+        alphabet.enqueue("o");
+        alphabet.enqueue("o");
+        alphabet.enqueue("p");
+        alphabet.enqueue("a");
+        alphabet.enqueue("s");
+        alphabet.enqueue("d");
+        alphabet.enqueue("j");
+        alphabet.enqueue("f");
+        alphabet.enqueue("g");
+        alphabet.enqueue("h");
+        alphabet.enqueue("j");
+        alphabet.enqueue("k");
+        alphabet.enqueue("l");
+        alphabet.enqueue("z");
+        alphabet.enqueue("x");
+        alphabet.enqueue("c");
+        alphabet.enqueue("j");
+        alphabet.enqueue("v");
+        alphabet.enqueue("b");
+        alphabet.enqueue("n");
+        alphabet.enqueue("m");
+
+
+
+        Queue<String> sortedalphabet = mergeSort(alphabet);
+
+        System.out.println(alphabet);
+        System.out.println(sortedalphabet);
+
     }
 }
