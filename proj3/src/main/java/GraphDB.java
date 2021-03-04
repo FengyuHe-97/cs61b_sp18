@@ -1,3 +1,4 @@
+import example.CSCourseDB;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -6,7 +7,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -20,6 +21,47 @@ import java.util.ArrayList;
 public class GraphDB {
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
+
+    /**
+     * A Node.
+     */
+    static class Node {
+        long id;
+        double lat;
+        double lon;
+        Map<String, String> extraInfo;
+
+        Node(long id, double lat, double lon) {
+            this.id = id;
+            this.lat = lat;
+            this.lon = lon;
+            this.extraInfo = new HashMap<>();
+        }
+    }
+
+    static class Way {
+        long id;
+        boolean flag;
+        List<Long> intersections; //用来表示这条边上有哪些节点
+        Map<String, String> extraInfo;
+
+        Way(long id) {
+            this.id = id;
+            flag = false;
+            intersections = new ArrayList<>();
+            extraInfo = new HashMap<>();
+        }
+    }
+
+    Map<Long, Set<Long>> adj = new HashMap<>();//连接关系
+    public final Map<Long, Node> nodes = new LinkedHashMap<>();//记录所有节点
+    public final Map<Long, Way> ways = new LinkedHashMap<>();//记录所有路
+
+    Set<Node> allNodes = new HashSet<>(); //所有的名字
+
+
+
+
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -57,7 +99,29 @@ public class GraphDB {
      *  we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        // TODO: Your code here.
+        //迭代过程中删除元素会产生concurrentmodificationexception异常，所以用集合记录，稍后一并删除
+/*        Set<Long> toRemove = new HashSet<>();
+        for(Node n : nodes.values() ) {
+            if(!adj.containsKey(n.id)) {
+                toRemove.add(n.id);
+            }
+        }*/
+        for (Node n: nodes.values()) {
+            if (n.extraInfo.containsKey("name")) {
+                allNodes.add(n);
+            }
+        }
+        Set<Long> toRemove = new HashSet<>();
+        for (long id: nodes.keySet()) {
+            if (!adj.containsKey(id)) {
+                toRemove.add(id); //迭代过程中删除元素会产生concurrentmodificationexception异常，所以用集合记录，稍后一并删除
+            }
+        }
+
+        for (long id: toRemove) {
+            nodes.remove(id);
+        }
+
     }
 
     /**
@@ -66,7 +130,7 @@ public class GraphDB {
      */
     Iterable<Long> vertices() {
         //YOUR CODE HERE, this currently returns only an empty list.
-        return new ArrayList<Long>();
+        return new ArrayList<Long>(nodes.keySet());
     }
 
     /**
@@ -75,7 +139,7 @@ public class GraphDB {
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-        return null;
+        return adj.get(v);
     }
 
     /**
@@ -136,7 +200,16 @@ public class GraphDB {
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        return 0;
+        double minDistance = Double.MAX_VALUE;
+        long toReturn = 0;
+        for (Map.Entry<Long, Node> entry: nodes.entrySet()) {
+            double currentDistance = distance(lon, lat, entry.getValue().lon, entry.getValue().lat);
+            if (currentDistance < minDistance) {
+                minDistance = currentDistance;
+                toReturn = entry.getKey();
+            }
+        }
+        return toReturn;
     }
 
     /**
@@ -145,7 +218,7 @@ public class GraphDB {
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        return 0;
+        return nodes.get(v).lon;
     }
 
     /**
@@ -154,6 +227,50 @@ public class GraphDB {
      * @return The latitude of the vertex.
      */
     double lat(long v) {
-        return 0;
+        return nodes.get(v).lat;
     }
+
+    void addNode(Node n) {
+        nodes.put(n.id, n);
+    }
+
+/*    void addWay(Way w) {
+        long lastRef = -10;
+        ways.put(w.id, w);
+        for (Long nodeId : w.intersections) {
+            if(lastRef == -10) {
+                if(!adj.containsKey(nodeId)){
+                    adj.put(nodeId, new HashSet<Long>());
+                }
+                lastRef = nodeId;
+            } else {
+              if(!adj.containsKey(nodeId)){
+                  adj.put(nodeId, new HashSet<Long>());
+              }
+              adj.get(lastRef).add(nodeId);
+              adj.get(nodeId).add(lastRef);
+              lastRef = nodeId;
+            }
+        }
+    }*/
+    //添加一条边，两个节点彼此相连即为边
+    void addEdge(long v, long w) {
+        if (!adj.containsKey(v)) {
+            adj.put(v, new HashSet<>());
+        }
+        adj.get(v).add(w);
+        if (!adj.containsKey(w)) {
+            adj.put(w, new HashSet<>());
+        }
+        adj.get(w).add(v);
+    }
+
+    //添加一条合法的路径，相邻节点之间都用边连起来
+    void addWay(Way e) {
+        for (int i = 0; i < e.intersections.size() - 1; i++) {
+            addEdge(e.intersections.get(i), e.intersections.get(i + 1));
+        }
+        ways.put(e.id, e);
+    }
+
 }

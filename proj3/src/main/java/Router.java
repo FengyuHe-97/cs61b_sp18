@@ -1,5 +1,4 @@
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +24,131 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
-        return null; // FIXME
+        //获取最近的节点
+        long startID = g.closest(stlon, stlat);
+        long endID = g.closest(destlon, destlat);
+
+
+        //Map<Long, Double> bestDistance = new HashMap<>();
+        Set<Long> marked = new HashSet<>();
+        List<Long> movePath = new LinkedList<>();
+
+
+        //double initDistance = Double.MAX_VALUE;
+/*        boolean initMark = false;
+        for (long id : g.nodes.keySet()) {
+            if (!bestDistance.containsKey(id)) {
+                bestDistance.put(id, initDistance);
+            }
+        }*/
+
+
+        //建立waitingNode类，追踪每个节点的父节点，便于寻找最短路径
+        class waitingNode implements Comparable<waitingNode> {
+            long id;
+            waitingNode parent;
+            double moveDistance;
+            double priority;
+
+            waitingNode(Long id, waitingNode parent) {
+                this.id = id;
+                this.parent = parent;
+                this.moveDistance = parent == null ? 0 : parent.moveDistance +
+                        +g.distance(id, parent.id);
+                priority = moveDistance + g.distance(id, endID);
+            }
+
+            @Override
+            /*
+            override compareTo for pass priorityQueue
+             */
+            public int compareTo(waitingNode n) {
+                return Double.compare(this.priority, n.priority);//highlight compare way
+            }
+
+//equals is used for update the priorityQuene,
+// here we give up update it because find is no need to update it.
+/*            @Override
+            public boolean equals(Object o){
+                if(o instanceof waitingNode){
+                    waitingNode c = (waitingNode)o;
+                    return id == c.id;
+                }
+                return false;
+            }*/
+        }
+
+        PriorityQueue<waitingNode> fringe = new PriorityQueue<>();
+        waitingNode currentNode = new waitingNode(startID, null);
+        while (currentNode.id != endID) {
+            if (!marked.contains(currentNode.id)) {
+                marked.add(currentNode.id);//marked after if, or every node can not pass if
+                for (Long id : g.adjacent(currentNode.id)) {
+                    if (currentNode.parent == null || !(id == currentNode.parent.id) && !(marked.contains(id))) {
+                        fringe.add(new waitingNode(id, currentNode));
+                    }
+                }
+            }
+            currentNode = fringe.poll();
+        }
+        for (waitingNode n = currentNode; n != null; n = n.parent) {
+            //The Java List interface does not define an addLast or
+            // removeLast method. Since you declared your variable as
+            // a List rather than a LinkedList, you'll only be able to
+            // access the members defined on the List interface
+            movePath.add(0, n.id);
+        }
+        return movePath;
+    }
+
+    /**
+     * 辅助函数，获取当前节点和下一个节点所在的路径
+     * @param num 节点的序号
+     */
+    private static String getWay(GraphDB g, List<Long> route, int num) {
+        String newWay = null;
+        for (GraphDB.Way w: g.ways.values()) {
+            if (w.intersections.contains(route.get(num))
+                    && w.intersections.contains(route.get(num + 1))) {
+                newWay = w.extraInfo.getOrDefault("name", "");
+                break;
+            }
+        }
+        return newWay;
+    }
+
+    /**
+     * 辅助函数，更新方向
+     * @param angle 两段路径的方位角之差，不能大于180度
+     */
+    private static int updateDirection(double angle) {
+        int currentDirection;
+        if (angle >= -15 && angle <= 15) {
+            currentDirection = NavigationDirection.STRAIGHT;
+        } else if (angle >= -30 && angle < -15) {
+            currentDirection = NavigationDirection.SLIGHT_LEFT;
+        } else if (angle > 15 && angle <= 30) {
+            currentDirection = NavigationDirection.SLIGHT_RIGHT;
+        } else if (angle >= -100 && angle < -30) {
+            currentDirection = NavigationDirection.LEFT;
+        } else if (angle > 30 && angle <= 100) {
+            currentDirection = NavigationDirection.RIGHT;
+        } else if (angle < -100) {
+            currentDirection = NavigationDirection.SHARP_LEFT;
+        } else {
+            currentDirection = NavigationDirection.SHARP_RIGHT;
+        }
+        return currentDirection;
+    }
+
+    /**
+     * 更新NavigationDirection对象的各个参数
+     */
+    private static void setNavigationDirection(NavigationDirection n,
+                                               String way, double distance, int direction) {
+        n.way = way;
+        n.distance = distance;
+        n.direction = direction;
     }
 
     /**
@@ -37,7 +160,41 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+        double distance = g.distance(route.get(0), route.get(1)); //单独考虑起点
+        int direction = NavigationDirection.START; //起点的方向为START(0)
+        int newDirection; //沿最短路径更新方向
+        String way = getWay(g, route, 0); //获取起点所在路段的名称
+        List<NavigationDirection> toReturn = new LinkedList<>();
+
+        for (int i = 1; i < route.size() - 1; i++) {
+            String newWay = getWay(g, route, i);
+            double prevBearing = g.bearing(route.get(i - 1), route.get(i)); //前一个位置的方位角
+            double currBearing = g.bearing(route.get(i), route.get(i + 1)); //当前位置的方位角
+            double angle = currBearing - prevBearing; //差值作为判断方向更新的依据
+            //角度不能超过180
+            if (Math.abs(angle) > 180) {
+                prevBearing = g.bearing(route.get(i), route.get(i - 1));
+                currBearing = g.bearing(route.get(i + 1), route.get(i));
+            }
+            angle = currBearing - prevBearing;
+            newDirection = updateDirection(angle);
+            //如果进入不同的路段，则创建并添加一个NavigationDirection对象，并更新其参数
+            if (!newWay.equals(way)) {
+                NavigationDirection n = new NavigationDirection();
+                setNavigationDirection(n, way, distance, direction);
+                toReturn.add(n);
+                distance = 0.0;
+                way = newWay;
+                direction = newDirection;
+            }
+            double newDistance = g.distance(route.get(i), route.get(i + 1));
+            distance += newDistance;
+        }
+        //单独考虑终点
+        NavigationDirection n = new NavigationDirection();
+        setNavigationDirection(n, way, distance, direction);
+        toReturn.add(n);
+        return toReturn;
     }
 
 

@@ -36,7 +36,7 @@ public class TestRouterTiny {
 
     @Test
     public void test22to11() {
-        List<Long> actual = Router.shortestPath(graphTiny, 0.2, 38.2, 0.1, 38.1);
+        List<Long> actual = Router. shortestPath(graphTiny, 0.2, 38.2, 0.1, 38.1);
         List<Long> expected = new ArrayList<>();
         expected.add(22L);
         expected.add(11L);

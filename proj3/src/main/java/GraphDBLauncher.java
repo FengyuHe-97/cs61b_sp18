@@ -1,3 +1,5 @@
+import example.CSCourseDB;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -8,6 +10,7 @@ import java.util.ArrayList;
  */
 public class GraphDBLauncher {
     private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018.osm.xml";
+
 
     public static void main(String[] args) {
         GraphDB g = new GraphDB(OSM_DB_PATH);

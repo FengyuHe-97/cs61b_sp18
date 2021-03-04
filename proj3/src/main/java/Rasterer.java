@@ -17,7 +17,7 @@ public class Rasterer {
     int depth;
     Boolean query_success;
 
-    private static final int SL = 288200;
+    private static final int SL = 288200; //each degree of longitude is SL = 288,200 feet
 
     public Rasterer() {
 
@@ -89,11 +89,11 @@ public class Rasterer {
         depth = 0;
         lrlon = params.get("lrlon");
         ullon = params.get("ullon");
-        w = params.get("w");
+        w = params.get("w");//browser window display  wide
         h = params.get("h");
         ullat = params.get("ullat");
         lrlat = params.get("lrlat");
-        LonDPP = (lrlon - ullon) * SL / w;
+        LonDPP = (lrlon - ullon) * SL / w;//feet/pixel
         maxLon = (MapServer.ROOT_LRLON - MapServer.ROOT_ULLON) / MapServer.TILE_SIZE * SL;
         while( !(maxLon / Math.pow(2,depth) <= LonDPP || depth == 7)) {
             depth += 1;
